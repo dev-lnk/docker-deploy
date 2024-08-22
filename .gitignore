@@ -16,8 +16,6 @@
 /src/vendor
 /src/node_modules
 
-/docker/volumes
-
 /.fleet
 /.idea
 /.vscode
