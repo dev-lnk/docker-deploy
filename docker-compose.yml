@@ -3,9 +3,10 @@ services:
   nginx:
     container_name: ${COMPOSE_PROJECT_NAME}-nginx
     build:
+      args:
+        port: ${APP_PORT}
       context: .
       dockerfile: ./docker/dockerfiles/nginx.Dockerfile
-      target: local
     restart: unless-stopped
     volumes:
       - ./src:/usr/src
