@@ -31,16 +31,20 @@ RUN useradd -G www-data,root -u $uid -d /home/$user $user
 RUN mkdir -p /home/$user/.composer && \
     chown -R $user:$user /home/$user
 
-COPY ./docker/deployment/bin/wait-for-it.sh /usr/wait-for-it.sh
-COPY ./docker/deployment/bin/update.sh /usr/update.sh
+COPY ./docker/deployment/bin/wait-for-it.sh /usr/wait-for-it_tmp.sh
+COPY ./docker/deployment/bin/update.sh /usr/update_tmp.sh
 COPY ./docker/deployment/config/php-fpm/php-prod.ini /usr/local/etc/php/conf.d/php.ini
 COPY ./docker/deployment/config/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 COPY ./src .
 
-RUN chmod +x /usr/update.sh && \
+RUN tr -d '\015' </usr/update_tmp.sh >/usr/update.sh && \
+    tr -d '\015' </usr/wait-for-it_tmp.sh >/usr/wait-for-it.sh && \
+    rm /usr/update_tmp.sh && \
+    rm /usr/wait-for-it_tmp.sh && \
+    chmod +x /usr/update.sh && \
     chmod +x /usr/wait-for-it.sh && \
-    chown -R $user:$user /usr/src && \
+    #chown -R $user:$user /usr/src && \
     chmod -R 775 ./storage ./bootstrap/cache
 
 USER $user
