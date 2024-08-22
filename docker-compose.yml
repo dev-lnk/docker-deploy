@@ -1,28 +1,17 @@
 version: "3.8"
 services:
-  proxy:
-    container_name: ${COMPOSE_PROJECT_NAME}-proxy
-    build:
-      context: .
-      dockerfile: ./docker/dockerfiles/proxy.Dockerfile
-      target: local
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT}:80"
-    volumes:
-      - ./docker/deployment/config/proxy.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - nginx
-
   nginx:
     container_name: ${COMPOSE_PROJECT_NAME}-nginx
     build:
       context: .
       dockerfile: ./docker/dockerfiles/nginx.Dockerfile
+      target: local
     restart: unless-stopped
     volumes:
       - ./src:/usr/src
       - ./docker/deployment/config/nginx-php.conf:/etc/nginx/nginx.conf
+    ports:
+      - "${APP_PORT}:80"
     depends_on:
       - php
 
@@ -130,3 +119,17 @@ services:
 #      - update
 #      - mysql
 #      - redis
+
+#  proxy:
+#    container_name: ${COMPOSE_PROJECT_NAME}-proxy
+#    build:
+#      context: .
+#      dockerfile: ./docker/dockerfiles/proxy.Dockerfile
+#      target: local
+#    restart: unless-stopped
+#    ports:
+#      - "${APP_PORT}:80"
+#    volumes:
+#      - ./docker/deployment/config/proxy.conf:/etc/nginx/nginx.conf
+#    depends_on:
+#      - nginx
