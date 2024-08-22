@@ -42,10 +42,10 @@ RUN tr -d '\015' </usr/update_tmp.sh >/usr/update.sh && \
     tr -d '\015' </usr/wait-for-it_tmp.sh >/usr/wait-for-it.sh && \
     rm /usr/update_tmp.sh && \
     rm /usr/wait-for-it_tmp.sh && \
-    chmod +x /usr/update.sh && \
-    chmod +x /usr/wait-for-it.sh && \
     #chown -R $user:$user /usr/src && \
-    chmod -R 775 ./storage ./bootstrap/cache
+    chmod -R 775 ./storage ./bootstrap/cache && \
+    chmod +x /usr/update.sh && \
+    chmod +x /usr/wait-for-it.sh
 
 USER $user
 
