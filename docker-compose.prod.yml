@@ -1,0 +1,125 @@
+version: "3.8"
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/proxy.Dockerfile
+      target: prod
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/deployment/config/proxy.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - nginx
+
+  php:
+    build:
+      args:
+        user: ${DOCKER_USER}
+        uid: 1000
+      context: .
+      dockerfile: ./docker/dockerfiles/php.Dockerfile
+      target: php
+    command: sh -c "cd /usr && ./wait-for-it.sh mysql:3306 -t 30 && ./wait-for-it.sh redis:6379 -t 30 && php-fpm"
+    restart: unless-stopped
+    volumes:
+      - ./src:/usr/src
+      - ./docker/deployment/config/php-fpm/php-dev.ini:/usr/local/etc/php/conf.d/php.ini
+    depends_on:
+      - update
+      - mysql
+      - redis
+
+  scheduler:
+    build:
+      args:
+        user: ${DOCKER_USER}
+        uid: 1000
+      context: .
+      dockerfile: ./docker/dockerfiles/php.Dockerfile
+      target: scheduler
+    restart: unless-stopped
+    volumes:
+      - ./src:/usr/src
+    depends_on:
+      - update
+      - mysql
+      - redis
+
+  worker:
+    build:
+      args:
+        user: ${DOCKER_USER}
+        uid: 1000
+      context: .
+      dockerfile: ./docker/dockerfiles/php.Dockerfile
+      target: worker
+    restart: unless-stopped
+    volumes:
+      - ./src:/usr/src
+    depends_on:
+      - update
+      - mysql
+      - redis
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/nginx.Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./src:/usr/src
+      - ./docker/deployment/config/nginx-php.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - php
+
+  mysql:
+    build:
+      args:
+        password: ${DB_PASSWORD}
+      context: .
+      dockerfile: ./docker/dockerfiles/mysql.Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./docker/volumes/mysqldata:/var/lib/mysql
+    ports:
+      - "33060:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+
+  redis:
+    image: redis:7.0.11-alpine
+    restart: unless-stopped
+    volumes:
+      - ./docker/volumes/redisdata:/data
+    ports:
+      - "6370:6379"
+
+  npm:
+    build:
+      args:
+        user: ${DOCKER_USER}
+        uid: 1000
+      context: .
+      dockerfile: ./docker/dockerfiles/frontend.Dockerfile
+    volumes:
+      - ./src:/usr/src
+    command: sh -c "npm install && npm run build"
+    restart: "no"
+    depends_on:
+      - php
+
+  update:
+    build:
+      args:
+        user: ${DOCKER_USER}
+        uid: 1000
+      context: .
+      dockerfile: ./docker/dockerfiles/php.Dockerfile
+    command: sh -c "cd /usr && ./wait-for-it.sh mysql:3306 -t 30 && ./update.sh"
+    restart: "no"
+    volumes:
+      - ./src:/usr/src
+    depends_on:
+      - mysql
