@@ -46,3 +46,11 @@ npm-build:
 	docker-compose run --rm --service-ports $(app-npm) run build $(c)
 npm-host:
 	docker-compose run --rm --service-ports $(app-npm) run dev --host $(c)
+
+docker-push:
+	docker tag $(COMPOSE_PROJECT_NAME)-php $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-php:$(IMAGE_TAG)
+	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-php:$(IMAGE_TAG)
+	docker tag $(COMPOSE_PROJECT_NAME)-nginx $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-nginx:$(IMAGE_TAG)
+	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-nginx:$(IMAGE_TAG)
+	docker tag $(COMPOSE_PROJECT_NAME)-mysql $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-mysql:$(IMAGE_TAG)
+	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-mysql:$(IMAGE_TAG)
