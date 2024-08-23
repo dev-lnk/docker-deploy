@@ -1,3 +1,5 @@
+/docker/volumes
+
 /src/.phpunit.cache
 /src/.phpunit.result.cache
 /src/supervisord.pid
