@@ -1,43 +1,20 @@
-# LARAVEL docker-compose
+# Laravel docker-compose
 
-## For install laravel
-### docker-compose.laravel.yml
-```
-version: "3.8"  
-services:  
-  laravel-install:  
-    build:  
-      args:  
-        user: ivan  
-        uid: 1000  
-      context: .  
-      dockerfile: ./docker/dockerfiles/laravel.Dockerfile  
-    command: sh -c "composer create-project laravel/laravel ."  
-    volumes:  
-      - ./src:/usr/src
-```
-### laravel.Dockerfile (add to docker/dockerfiles)
-```
-FROM php:8.3-fpm  
-  
-WORKDIR /usr/src  
-  
-ARG user  
-ARG uid  
-  
-RUN apt-get update && apt-get install -y \  
-    curl \  
-    libpng-dev \  
-    libonig-dev \  
-    libxml2-dev \  
-    libzip-dev \  
-    libc6 \  
-    zip \  
-    unzip  
-  
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*  
-  
-COPY --from=composer:2.5.8 /usr/bin/composer /usr/bin/composer  
-  
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-```
+## Комментарии к проекту
+- Это демонстрационный вариант для работы docker и laravel в dev и production среде, без использования swarm и kubernetes
+- Проксирование выполняется на стороне сервера для того, чтобы можно было держать на одном сервере сразу несколько проектов
+
+## Разработка
+- В директорию src установить проект laravel
+- На время разработки .env.example скопировать в /src/.env а так же в .env. Корневой .env необходим для работы докера, /src/.env для работы laravel (на production используется только корневой .env)
+- Выполнить `make build`, далее использовать `make up`
+- Для работы с npm используется специальный контейнер, в Makefile есть 3 базовые команды: `make npm-install` `make npm-host` `make npm-build`
+
+## Сбор контейнеров
+- Чтобы собрать и запушить контейнеры необходимо выполнить команду `make docker-build tag=<your_tag>`
+
+## Deploy
+- В папке деплоя проекта необходимо наличие `docker-compose.prod.yml`, `.env` и `Makefile` (по желанию)
+- volumes приложения находятся в папке `/var/lib/docker/volumes`
+- в `.env` в переменной `IMAGE_TAG` указать нужный тег
+- Выполнить `make up-prod`

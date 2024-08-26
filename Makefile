@@ -1,7 +1,7 @@
 include .env
 
 THIS_FILE := $(lastword $(MAKEFILE_LIST))
-.PHONY: build rebuild rebuild-app up it migrate migrate-rollback migrate-fresh migration composer-install composer-update composer-du npm-install npm-update npm-build npm-host
+.PHONY: build rebuild rebuild-app up it migrate migrate-rollback migrate-fresh migration composer-install composer-update composer-du npm-install npm-update npm-build npm-host docker-build
 
 app := $(COMPOSE_PROJECT_NAME)-php
 app-npm := npm
@@ -18,6 +18,9 @@ up:
 	docker-compose -f docker-compose.yml up -d $(c)
 it:
 	docker exec -it $(app) /bin/bash
+up-prod:
+	docker-compose -f docker-compose.prod.yml down
+	docker-compose -f docker-compose.prod.yml up -d $(c)
 
 #laravel
 migrate:
@@ -47,10 +50,14 @@ npm-build:
 npm-host:
 	docker-compose run --rm --service-ports $(app-npm) run dev --host $(c)
 
-docker-push:
-	docker tag $(COMPOSE_PROJECT_NAME)-php $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-php:$(IMAGE_TAG)
-	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-php:$(IMAGE_TAG)
-	docker tag $(COMPOSE_PROJECT_NAME)-nginx $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-nginx:$(IMAGE_TAG)
-	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-nginx:$(IMAGE_TAG)
-	docker tag $(COMPOSE_PROJECT_NAME)-mysql $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-mysql:$(IMAGE_TAG)
-	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-mysql:$(IMAGE_TAG)
+docker-build:
+	#build
+	docker build -t $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-php:$(tag) --target=prod --build-arg user=$(DOCKER_USER) --build-arg uid=1000 -f docker/dockerfiles/php.Dockerfile .
+	docker build -t $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-scheduler:$(tag) --target=scheduler --build-arg user=$(DOCKER_USER) --build-arg uid=1000 -f docker/dockerfiles/php.Dockerfile .
+	docker build -t $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-nginx:$(tag) --target=prod -f docker/dockerfiles/nginx.Dockerfile .
+	docker build -t $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-mysql:$(tag) --build-arg password=$(DB_PASSWORD) -f docker/dockerfiles/mysql.Dockerfile .
+	#push
+	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-php:$(tag)
+	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-scheduler:$(tag)
+	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-nginx:$(tag)
+	docker push $(DOCKER_HUB_USER)/$(COMPOSE_PROJECT_NAME)-mysql:$(tag)
