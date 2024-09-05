@@ -7,6 +7,8 @@
 ## Разработка
 - В директорию src установить проект laravel
 - `.env.example` скопировать в `/src/.env`
+- `docker/deployment/config/nginx-php.conf` изменить `php:9000` на нужный адрес
+- `docker/deployment/config/mysql/create_database.sql` указать нужную базу
 - Выполнить `make build`, далее использовать `make up`
 - Для работы с npm используется специальный контейнер, в Makefile есть 3 базовые команды: `make npm-install` `make npm-host` `make npm-build`
 
