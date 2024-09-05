@@ -4,6 +4,8 @@ THIS_FILE := $(lastword $(MAKEFILE_LIST))
 .PHONY: build rebuild rebuild-app up it migrate migrate-rollback migrate-fresh migration composer-install composer-update composer-du npm-install npm-update npm-build npm-host docker-build
 
 app := $(COMPOSE_PROJECT_NAME)-php
+nginx := $(COMPOSE_PROJECT_NAME)-nginx
+mysql := $(COMPOSE_PROJECT_NAME)-mysql
 app-npm := npm
 path := /usr/src
 
@@ -22,6 +24,10 @@ it:
 	docker exec -it $(to) /bin/bash
 it-app:
 	docker exec -it $(app) /bin/bash
+it-nginx:
+	docker exec -it $(nginx) /bin/bash
+it-mysql:
+	docker exec -it $(mysql) /bin/bash
 
 up-prod:
 	docker-compose -f docker-compose.prod.yml down
