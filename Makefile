@@ -20,6 +20,9 @@ stop:
 	docker-compose -f docker-compose.yml --env-file src/.env stop $(c)
 it:
 	docker exec -it $(to) /bin/bash
+it-app:
+	docker exec -it $(app) /bin/bash
+
 up-prod:
 	docker-compose -f docker-compose.prod.yml down
 	docker-compose -f docker-compose.prod.yml up -d $(c)

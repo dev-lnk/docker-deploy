@@ -46,7 +46,7 @@ RUN tr -d '\015' </usr/update_tmp.sh >/usr/update.sh && \
 
 FROM php AS dev
 COPY ./src .
-RUN chmod -R 775 ./storage ./bootstrap/cache
+RUN if [[ -d '/usr/src/storage' ]] ; then chmod -R 775 ./storage ./bootstrap/cache ; fi
 USER $user
 
 FROM php AS prod
