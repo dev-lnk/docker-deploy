@@ -12,6 +12,10 @@
 - Выполнить `make build`, далее использовать `make up`
 - Для работы с npm используется специальный контейнер, в Makefile есть 3 базовые команды: `make npm-install` `make npm-host` `make npm-build`
 
+## Первый запуск и установка Laravel
+- В файле docker-compose.yml в секции php закомментировать command:
+- Выполнить make laravel-install
+- Раскомментировать command:
 ## Сбор контейнеров
 - Чтобы собрать и запушить контейнеры необходимо выполнить команду `make docker-build tag=<your_tag>`
 

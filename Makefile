@@ -34,6 +34,13 @@ up-prod:
 	docker-compose -f docker-compose.prod.yml up -d $(c)
 
 #laravel
+#laravel
+laravel-install:
+	mv ./src/.env ./.env
+	rm ./src/.gitignore
+	docker exec $(app) composer create-project laravel/laravel .
+	rm ./src/.env
+	mv ./.env ./src/.env
 migrate:
 	docker exec $(app) php $(path)/artisan migrate
 migrate-rollback:
